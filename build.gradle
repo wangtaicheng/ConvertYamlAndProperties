@@ -1,55 +1,65 @@
 buildscript {
     repositories {
-        jcenter()
         google()
-        maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+        maven { url = 'https://maven.pkg.jetbrains.space/public/p/intellij-plugin-service' }
         mavenCentral()
     }
 }
 
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.3.5'
+//    id 'org.jetbrains.kotlin.jvm' version '2.1'
+//    id 'org.jetbrains.intellij' version '1.15.0'
+    id 'org.jetbrains.intellij.platform' version '2.2.1'
 }
 //plugin config
 apply plugin: 'idea'
-apply plugin: 'org.jetbrains.intellij'
+apply plugin: 'org.jetbrains.intellij.platform'
 
 group 'com.github.chencn.yamlandprops'
-version '1.0.5'
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-repositories {
-    jcenter()
-    google()
-    mavenCentral()
+version '2.0.5'
+ext {
+    since = "241.*"
+    until = "253.*"
 }
 
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    intellijPlatform {
+        intellijIdeaCommunity("2024.3.2")
+        bundledPlugins("com.intellij.java")
+    }
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
-intellij {
-    //pluginName
-    pluginName 'ConvertYamlAndProperties'
-    sandboxDirectory = "${rootProject.rootDir}/idea-sandbox"
-    // Disables updating since-build attribute in plugin.xml
-    intellij.updateSinceUntilBuild false
-    version '2017.3'
-    type 'IC'
-}
-patchPluginXml {
-    changeNotes """
+intellijPlatform {
+    pluginConfiguration {
+        id = "com.github.yamlandprops"
+        name = "Convert YAML and Properties File"
+        changeNotes = """
+      <p>2.0.5: <b>upgrade version to adapt to new version 2024.3</b></p>
       <p>1.0.5: <b>fix bugs.</b></p>
       <p>1.0.4: <b>fix bugs.</b></p>
       <p>1.0.3: <b>fix YAML file null value exception.</b></p>
       <p>1.0.2: <b>Show menu only with files of specified type.</b></p>
       <p>1.0.0: <b>You can quickly convert <em>Properties</em> files to <em>YAML</em> files, or <em>YAML</em> files to <em>Properties</em> files</b></p>"""
+
+        ideaVersion {
+            sinceBuild = since
+            untilBuild = until
+        }
+    }
+
+    pluginVerification {
+        ides {
+            ide("IC", since, false)
+        }
+    }
 }
 
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
-}
+

@@ -1,8 +1,9 @@
 <idea-plugin>
     <id>com.github.chencn.yamlandprops</id>
     <name>Convert YAML and Properties File</name>
-    <version>1.0.5</version>
-    <vendor email="chenxuq@live.com" url="https://github.com/chencn/ConvertYamlAndProperties">xqchen</vendor>
+    <version>2.0.5</version>
+    <vendor email="q394049428@hotmail.com" url="https://github.com/wangtaicheng/ConvertYamlAndProperties">xqchen
+    </vendor>
 
     <description><![CDATA[
      <h1>Convert YAML and Properties File</h1>
@@ -16,7 +17,7 @@
     ]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="173"/>
+    <idea-version since-build="241"/>
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
