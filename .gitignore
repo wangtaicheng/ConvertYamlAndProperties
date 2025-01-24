@@ -20,6 +20,8 @@ target/
 *.ipr
 /out
 /idea-sandbox/
+.intellijPlatform
+.fastRequest
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
