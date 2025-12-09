@@ -10,17 +10,17 @@ plugins {
     id 'java'
 //    id 'org.jetbrains.kotlin.jvm' version '2.1'
 //    id 'org.jetbrains.intellij' version '1.15.0'
-    id 'org.jetbrains.intellij.platform' version '2.2.1'
+    id 'org.jetbrains.intellij.platform' version '2.10.5'
 }
 //plugin config
 apply plugin: 'idea'
 apply plugin: 'org.jetbrains.intellij.platform'
 
 group 'com.github.chencn.yamlandprops'
-version '2.0.7'
+version '2.0.8'
 ext {
-    since = "241"
-    until = "252.*"
+    since = "253.28294.334"
+    until = "253.*"
 }
 
 repositories {
@@ -31,7 +31,8 @@ repositories {
 }
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity '2024.3.2'
+//        intellijIdeaCommunity '2024.3.2'
+        intellijIdea '2025.3'
         bundledPlugin 'com.intellij.java'
     }
 }
@@ -43,6 +44,7 @@ intellijPlatform {
         name = "Convert YAML and Properties File"
         version = project.version
         changeNotes = """
+      <p>2.0.8: <b>upgrade version to adapt to new version 253.*</b></p>
       <p>2.0.5: <b>upgrade version to adapt to new version 2024.3</b></p>
       <p>1.0.5: <b>fix bugs.</b></p>
       <p>1.0.4: <b>fix bugs.</b></p>
@@ -58,7 +60,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            ide("IC", since, false)
+            ide("IU", since, false)
         }
 
     }

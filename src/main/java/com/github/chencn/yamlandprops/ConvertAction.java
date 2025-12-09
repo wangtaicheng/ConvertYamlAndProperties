@@ -13,6 +13,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -93,9 +94,16 @@ public class ConvertAction extends AnAction {
                                     MsgConsts.SELECT_PROPS_OR_YAML_FIRST, NotificationType.ERROR));
                         }
 
+                    } catch(ProcessCanceledException e) {
+                        // 忽略协程取消异常，这是正常的控制流异常
+                        Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
+                                "Operation cancelled", "The operation was cancelled", NotificationType.INFORMATION));
                     } catch(IOException e) {
                         Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
                                 MsgConsts.CANNOT_RENAME_FILE, e.getMessage(), NotificationType.ERROR));
+                    } catch(Exception e) {
+                        Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
+                                "Unexpected error", "An unexpected error occurred: " + e.getMessage(), NotificationType.ERROR));
                     }
                 });
     }
