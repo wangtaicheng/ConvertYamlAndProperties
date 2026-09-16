@@ -1,49 +1,44 @@
-buildscript {
-    repositories {
-        google()
-        maven { url = uri('https://maven.pkg.jetbrains.space/public/p/intellij-plugin-service') }
-        mavenCentral()
-    }
-}
-
 plugins {
     id 'java'
-//    id 'org.jetbrains.kotlin.jvm' version '2.1'
-//    id 'org.jetbrains.intellij' version '1.15.0'
-    id 'org.jetbrains.intellij.platform' version '2.10.5'
+    id 'org.jetbrains.intellij.platform' version '2.19.0'
 }
-//plugin config
-apply plugin: 'idea'
-apply plugin: 'org.jetbrains.intellij.platform'
 
 group 'com.github.chencn.yamlandprops'
-version '2.0.10'
+version '3.0.0'
+
 ext {
-    since = "253.28294.334"
+    since = "262"
     until = "262.*"
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 repositories {
+    mavenLocal()
     mavenCentral()
     intellijPlatform {
         defaultRepositories()
     }
 }
+
 dependencies {
     intellijPlatform {
-//        intellijIdeaCommunity '2024.3.2'
-        intellijIdea '2025.3'
+        intellijIdea '2026.2'
         bundledPlugin 'com.intellij.java'
     }
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
 intellijPlatform {
     pluginConfiguration {
         id = "com.github.yamlandprops"
         name = "Convert YAML and Properties File"
         version = project.version
         changeNotes = """
+      <p>3.0.0: <b>drop support for versions before 2026.2; require IntelliJ IDEA 2026.2+.</b></p>
       <p>2.0.10: <b>upgrade version to adapt to new version 262.*</b></p>
       <p>2.0.9: <b>upgrade version to adapt to new version 261.*</b></p>
       <p>2.0.8: <b>upgrade version to adapt to new version 253.*</b></p>
@@ -62,10 +57,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            ide("IU", since, false)
+            current()
         }
-
     }
 }
-
-

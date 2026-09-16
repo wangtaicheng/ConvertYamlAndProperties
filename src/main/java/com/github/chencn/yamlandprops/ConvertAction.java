@@ -5,15 +5,15 @@ import com.github.chencn.yamlandprops.consts.MsgConsts;
 import com.github.chencn.yamlandprops.props2yaml.Props2Yaml;
 import com.github.chencn.yamlandprops.utils.CommonUtils;
 import com.github.chencn.yamlandprops.yaml2props.Yaml2Props;
-import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;
-import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
@@ -29,6 +29,21 @@ public class ConvertAction extends AnAction {
     @Override
     public @NotNull ActionUpdateThread getActionUpdateThread() {
         return ActionUpdateThread.BGT;
+    }
+
+    /**
+     * 通过 NotificationGroupManager 发送通知，替代已过时的 new Notification(...) 构造方式。
+     *
+     * @param project 当前项目，可为 null（应用级通知）
+     * @param title   通知标题
+     * @param content 通知内容
+     * @param type    通知类型
+     */
+    private void notify(Project project, String title, String content, NotificationType type) {
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup(Constant.GROUP_DISPLAY_ID)
+                .createNotification(title, content, type)
+                .notify(project);
     }
 
     @Override
@@ -58,8 +73,7 @@ public class ConvertAction extends AnAction {
         }
         final VirtualFile file = selectedFile.getVirtualFile();
         if(null == file) {
-            Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID, MsgConsts.NO_FILE_SELECTED,
-                    MsgConsts.SELECT_FILE_FIRST, NotificationType.ERROR));
+            notify(event.getProject(), MsgConsts.NO_FILE_SELECTED, MsgConsts.SELECT_FILE_FIRST, NotificationType.ERROR);
             return;
         }
         ApplicationManager.getApplication()
@@ -67,43 +81,35 @@ public class ConvertAction extends AnAction {
                     try {
                         String content = new String(file.contentsToByteArray());
                         if(StringUtil.isEmpty(content)) {
-                            Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID, MsgConsts.FILE_NOT_EMPTY,
-                                    MsgConsts.SELECT_FILE_FIRST, NotificationType.ERROR));
+                            notify(event.getProject(), MsgConsts.FILE_NOT_EMPTY, MsgConsts.SELECT_FILE_FIRST, NotificationType.ERROR);
                             return;
                         }
                         // YAML文件处理
                         if(Constant.YAML.equals(fileType)) {
                             String yamlContent = Yaml2Props.fromContent(content)
                                     .convert();
-                            file.setCharset(file.getCharset());
                             file.rename(this, file.getNameWithoutExtension() + Constant.PROPERTIES_SUFFIX);
                             file.setBinaryContent(yamlContent.getBytes());
 
-                            Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID, MsgConsts.SUCCESS,
-                                    MsgConsts.YAML2PROPS, NotificationType.INFORMATION));
+                            notify(event.getProject(), MsgConsts.SUCCESS, MsgConsts.YAML2PROPS, NotificationType.INFORMATION);
                         }// PROPERTIES文件处理
                         else if(Constant.PROPERTIES.equals(fileType)) {
                             String propsContent = Props2Yaml.fromContent(content)
                                     .convert();
                             file.rename(this, file.getNameWithoutExtension() + Constant.YAML_SUFFIX);
                             file.setBinaryContent(propsContent.getBytes());
-                            Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID, MsgConsts.SUCCESS,
-                                    MsgConsts.PROPS2YAML, NotificationType.INFORMATION));
+                            notify(event.getProject(), MsgConsts.SUCCESS, MsgConsts.PROPS2YAML, NotificationType.INFORMATION);
                         } else {
-                            Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID, MsgConsts.INCORRECT_FILE_SELECTED,
-                                    MsgConsts.SELECT_PROPS_OR_YAML_FIRST, NotificationType.ERROR));
+                            notify(event.getProject(), MsgConsts.INCORRECT_FILE_SELECTED, MsgConsts.SELECT_PROPS_OR_YAML_FIRST, NotificationType.ERROR);
                         }
 
                     } catch(ProcessCanceledException e) {
                         // 忽略协程取消异常，这是正常的控制流异常
-                        Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
-                                "Operation cancelled", "The operation was cancelled", NotificationType.INFORMATION));
+                        notify(event.getProject(), "Operation cancelled", "The operation was cancelled", NotificationType.INFORMATION);
                     } catch(IOException e) {
-                        Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
-                                MsgConsts.CANNOT_RENAME_FILE, e.getMessage(), NotificationType.ERROR));
+                        notify(event.getProject(), MsgConsts.CANNOT_RENAME_FILE, e.getMessage(), NotificationType.ERROR);
                     } catch(Exception e) {
-                        Notifications.Bus.notify(new Notification(Constant.GROUP_DISPLAY_ID,
-                                "Unexpected error", "An unexpected error occurred: " + e.getMessage(), NotificationType.ERROR));
+                        notify(event.getProject(), "Unexpected error", "An unexpected error occurred: " + e.getMessage(), NotificationType.ERROR);
                     }
                 });
     }
